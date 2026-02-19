@@ -42,7 +42,8 @@ async def kusk(interaction: discord.Interaction):
 
     victim = random.choice(list(authors))
     name = interaction.user.display_name
-    await interaction.response.send_message(f"{name} укусила {victim.mention}! 😼")
+    await interaction.response.send_message(f"{name} укусил(а) {victim.mention}! 😼")
 
 # Запуск
 bot.run(TOKEN)
+
