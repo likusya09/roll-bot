@@ -36,7 +36,7 @@ async def roll(interaction: discord.Interaction, max_number: int):
 @bot.tree.command(name="кусь", description="Укусить указанного пользователя")
 async def kus(interaction: discord.Interaction, target: discord.Member):
     name = interaction.user.display_name
-    await interaction.response.send_message(f"{name} укусила {target.mention}! 😼")
+    await interaction.response.send_message(f"{name} укусил(а) {target.mention}! 😼")
 
 # === /куськ ===
 @bot.tree.command(name="куськ", description="Укусить случайного участника, писавшего здесь за последние 2 дня")
@@ -59,7 +59,7 @@ async def kusk(interaction: discord.Interaction):
 
     victim = random.choice(list(authors))
     name = interaction.user.display_name
-    await interaction.response.send_message(f"{name} укусила {victim.mention}! 😼")
+    await interaction.response.send_message(f"{name} укусил(а) {victim.mention}! 😼")
 
 # === ЗАПУСК ===
 if __name__ == "__main__":
@@ -67,3 +67,4 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
