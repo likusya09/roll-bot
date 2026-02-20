@@ -66,7 +66,7 @@ def get_verb_suffix(name: str) -> str:
     lower = name.lower()
     if (
         lower.endswith(("а", "я", "ь")) or
-        lower in ["belova7777", "v_hanali_v", "borobka", "dannika_wildfire", "alinkal", "ellie_rou", "blusky2568", "Kurumi"]
+        lower in ["belova7777", "v_hanali_v", "borobka", "dannika_wildfire", "alinkal", "ellie_rou", "blusky2568", "Kurumi", "@kurumi07948", "@Kurumi"]
     ):
         return "а"
     return ""
@@ -168,5 +168,6 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
 
 
