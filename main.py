@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import random
 import os
 
-# === НАСТРОЙКИ ===
+# === ТОКЕН ===
 TOKEN = os.getenv("DISCORD_TOKEN")  # Для Replit/Railway
 # Если локально — замени на: TOKEN = "твой_токен_здесь"
 
@@ -28,17 +28,16 @@ async def roll(interaction: discord.Interaction, max_number: int):
     if max_number < 1:
         await interaction.response.send_message("❌ Число должно быть ≥ 1.", ephemeral=True)
         return
-    await interaction.response.defer()
     result = random.randint(1, max_number)
-    await interaction.followup.send(f"🎲 Выпало: **{result}** (из 1–{max_number})")
+    await interaction.response.send_message(f"🎲 Выпало: **{result}** (из 1–{max_number})")
 
-# === /кусь === (простой)
+# === /кусь ===
 @bot.tree.command(name="кусь", description="Укусить указанного пользователя")
 async def kus(interaction: discord.Interaction, target: discord.Member):
     name = interaction.user.display_name
     await interaction.response.send_message(f"{name} укусил(а) {target.mention}! 😼")
 
-# === /куськ === (простой)
+# === /куськ ===
 @bot.tree.command(name="куськ", description="Укусить случайного участника, писавшего здесь за последние 2 дня")
 async def kusk(interaction: discord.Interaction):
     channel = interaction.channel
@@ -61,32 +60,45 @@ async def kusk(interaction: discord.Interaction):
     name = interaction.user.display_name
     await interaction.response.send_message(f"{name} укусил(а) {victim.mention}! 😼")
 
-# === Вспомогательная функция для РП-атаки ===
+# === Вспомогательная функция для склонения ===
+def get_verb_suffix(name: str) -> str:
+    """Возвращает 'а' если имя женское, иначе ''."""
+    lower = name.lower()
+    if (
+        lower.endswith(("а", "я", "ь")) or
+        lower in ["лика", "боробка", "даника", "аня", "няшка", "курими"]
+    ):
+        return "а"
+    return ""
+
+# === Вспомогательная функция для броска ===
 def roll_attack():
     r = random.random()
     if r < 0.01:       # 1% — мегакусь
-        return "megakus", "Мегакусь", -100
-    elif r < 0.03:      # 20% крит (1% + 2% = 3%)
-        return "crit", "Крит", -20
-    elif r < 0.53:      # 50% попадание (3% → 53%)
-        return "hit", "Попадание", -10
-    elif r < 0.63:      # 10% промах (53% → 63%)
-        return "miss", "Промах", 0
-    else:               # оставшиеся 37% — тоже попадание (для надёжности)
-        return "hit", "Попадание", -10
+        return "megakus"
+    elif r < 0.21:      # 20% — крит
+        return "crit"
+    elif r < 0.71:      # 50% — попадание
+        return "hit"
+    elif r < 0.81:      # 10% — промах
+        return "miss"
+    elif r < 0.90:      # 9% — контратака
+        return "counter"
+    elif r < 0.95:      # 5% — падение
+        return "fail"
+    elif r < 1.00:      # 5% — зелье
+        return "potion"
 
-# === /кусьРП === (РП-версия с HP и склонением)
+# === /кусьрп ===
 @bot.tree.command(name="кусьрп", description="Укусить указанного пользователя с РП-эффектами и HP")
 async def kus_rp(interaction: discord.Interaction, target: discord.Member):
-    author_name = interaction.user.display_name
-    outcome, label, hp = roll_attack()
+    author = interaction.user
+    author_name = author.display_name
+    target_name = target.display_name
+    verb_suffix = get_verb_suffix(author_name)
+    target_verb_suffix = get_verb_suffix(target_name)
 
-    # Подбираем глагол по полу/нейтрально (упрощённо: если имя оканчивается на 'а' или в списке — используем «а»)
-    # Можно улучшить через role/ник, но для простоты — так:
-    if interaction.user.display_name.endswith(("а", "я", "ь")) or interaction.user.display_name.lower() in ["лика", "боробка", "даника"]:
-        verb_suffix = "а"
-    else:
-        verb_suffix = ""
+    outcome = roll_attack()
 
     if outcome == "megakus":
         msg = f"(Мегакусь)! {author_name} Свалил{verb_suffix}(а) наповал {target.mention}! (-100HP)"
@@ -96,10 +108,16 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
         msg = f"(Попадание)! {author_name} Укусил{verb_suffix}(а) {target.mention}! (-10HP)"
     elif outcome == "miss":
         msg = f"(Промах)! {author_name} Не попал{verb_suffix}(а) по {target.mention}! (Целься лучше лузер)"
+    elif outcome == "counter":
+        msg = f"(Парирование)! {target.mention} Ловко ушёл{target_verb_suffix}(а) от атаки и укусил{target_verb_suffix}(а) {author_name}! (-10HP)"
+    elif outcome == "fail":
+        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix}(а) моськой в лужу, когда хотела укусить {target.mention}!"
+    elif outcome == "potion":
+        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix}(а) поесть вискаса, а не кусить {target.mention}!"
 
     await interaction.response.send_message(msg)
 
-# === /куськРП === (РП-версия, рандом из чата)
+# === /куськрп ===
 @bot.tree.command(name="куськрп", description="Укусить случайного участника, писавшего здесь за последние 2 дня — с РП-эффектами")
 async def kusk_rp(interaction: discord.Interaction):
     channel = interaction.channel
@@ -119,15 +137,13 @@ async def kusk_rp(interaction: discord.Interaction):
         return
 
     victim = random.choice(list(authors))
-    author_name = interaction.user.display_name
+    author = interaction.user
+    author_name = author.display_name
+    victim_name = victim.display_name
+    verb_suffix = get_verb_suffix(author_name)
+    victim_verb_suffix = get_verb_suffix(victim_name)
 
-    # Склонение для автора
-    if author_name.endswith(("а", "я", "ь")) or author_name.lower() in ["лика", "боробка", "даника"]:
-        verb_suffix = "а"
-    else:
-        verb_suffix = ""
-
-    outcome, label, hp = roll_attack()
+    outcome = roll_attack()
 
     if outcome == "megakus":
         msg = f"(Мегакусь)! {author_name} Свалил{verb_suffix}(а) наповал {victim.mention}! (-100HP)"
@@ -137,6 +153,12 @@ async def kusk_rp(interaction: discord.Interaction):
         msg = f"(Попадание)! {author_name} Укусил{verb_suffix}(а) {victim.mention}! (-10HP)"
     elif outcome == "miss":
         msg = f"(Промах)! {author_name} Не попал{verb_suffix}(а) по {victim.mention}! (Целься лучше лузер)"
+    elif outcome == "counter":
+        msg = f"(Парирование)! {victim.mention} Ловко ушёл{victim_verb_suffix}(а) от атаки и укусил{victim_verb_suffix}(а) {author_name}! (-10HP)"
+    elif outcome == "fail":
+        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix}(а) моськой в лужу, когда хотела укусить {victim.mention}!"
+    elif outcome == "potion":
+        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix}(а) поесть вискаса, а не кусить {victim.mention}!"
 
     await interaction.response.send_message(msg)
 
@@ -146,4 +168,3 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
-
