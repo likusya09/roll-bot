@@ -3,6 +3,7 @@ from discord.ext import commands
 from datetime import datetime, timedelta, timezone
 import random
 import os
+import re
 
 # === ТОКЕН ===
 TOKEN = os.getenv("DISCORD_TOKEN")  # Для Replit/Railway
@@ -16,12 +17,16 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # === ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ СКЛОНЕНИЯ ===
 def get_verb_suffix(name: str) -> str:
     """Возвращает 'а', если имя женское, иначе ''."""
-    clean = name.strip().lower()
+    # Оставляем только буквы и цифры, приводим к нижнему регистру
+    clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
+    
+    # Список очищенных женских имён (только текст!)
     female_names = {
-        "belova7777", "v_hanali_v", "borobka", "dannika_wildfire",
-        "alinkal", "ellie_rou", "blusky2568", "kurumi",  # ← именно так!
-        "лика", "аня", "даника", "боробка", "няшка", "анечка"
+        "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
+        "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
+        "anyadark", "solnishko", "bonniblu"
     }
+    
     if clean.endswith(("а", "я", "ь")) or clean in female_names:
         return "а"
     return ""
