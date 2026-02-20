@@ -13,6 +13,19 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# === ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ СКЛОНЕНИЯ ===
+def get_verb_suffix(name: str) -> str:
+    """Возвращает 'а', если имя женское, иначе ''."""
+    clean = name.strip().lower()
+    female_names = {
+        "belova7777", "v_hanali_v", "borobka", "dannika_wildfire",
+        "alinkal", "ellie_rou", "blusky2568", "kurumi",  # ← именно так!
+        "лика", "аня", "даника", "боробка", "няшка", "анечка"
+    }
+    if clean.endswith(("а", "я", "ь")) or clean in female_names:
+        return "а"
+    return ""
+
 @bot.event
 async def on_ready():
     print(f"✅ Бот {bot.user} запущен!")
@@ -35,7 +48,8 @@ async def roll(interaction: discord.Interaction, max_number: int):
 @bot.tree.command(name="кусь", description="Укусить указанного пользователя")
 async def kus(interaction: discord.Interaction, target: discord.Member):
     name = interaction.user.display_name
-    await interaction.response.send_message(f"{name} укусил(а) {target.mention}! 😼")
+    suffix = get_verb_suffix(name)
+    await interaction.response.send_message(f"{name} укусил{suffix} {target.mention}! 😼")
 
 # === /куськ ===
 @bot.tree.command(name="куськ", description="Укусить случайного участника, писавшего здесь за последние 2 дня")
@@ -58,18 +72,8 @@ async def kusk(interaction: discord.Interaction):
 
     victim = random.choice(list(authors))
     name = interaction.user.display_name
-    await interaction.response.send_message(f"{name} укусил(а) {victim.mention}! 😼")
-
-# === Вспомогательная функция для склонения ===
-def get_verb_suffix(name: str) -> str:
-    """Возвращает 'а' если имя женское, иначе ''."""
-    lower = name.lower()
-    if (
-        lower.endswith(("а", "я", "ь")) or
-        lower in ["belova7777", "v_hanali_v", "borobka", "dannika_wildfire", "alinkal", "ellie_rou", "blusky2568", "Kurumi", "@kurumi07948", "@Kurumi"]
-    ):
-        return "а"
-    return ""
+    suffix = get_verb_suffix(name)
+    await interaction.response.send_message(f"{name} укусил{suffix} {victim.mention}! 😼")
 
 # === Вспомогательная функция для броска ===
 def roll_attack():
@@ -86,7 +90,7 @@ def roll_attack():
         return "counter"
     elif r < 0.95:      # 5% — падение
         return "fail"
-    elif r < 1.00:      # 5% — зелье
+    else:               # 5% — зелье
         return "potion"
 
 # === /кусьрп ===
@@ -146,19 +150,19 @@ async def kusk_rp(interaction: discord.Interaction):
     outcome = roll_attack()
 
     if outcome == "megakus":
-        msg = f"(Мегакусь)! {author_name} Свалил{verb_suffix}(а) наповал {victim.mention}! (-100HP)"
+        msg = f"(Мегакусь)! {author_name} Свалил{verb_suffix} наповал {victim.mention}! (-100HP)"
     elif outcome == "crit":
-        msg = f"(Крит)! {author_name} Оторвал{verb_suffix}(а) кусочек от {victim.mention}! (-20HP)"
+        msg = f"(Крит)! {author_name} Оторвал{verb_suffix} кусочек от {victim.mention}! (-20HP)"
     elif outcome == "hit":
-        msg = f"(Попадание)! {author_name} Укусил{verb_suffix}(а) {victim.mention}! (-10HP)"
+        msg = f"(Попадание)! {author_name} Укусил{verb_suffix} {victim.mention}! (-10HP)"
     elif outcome == "miss":
-        msg = f"(Промах)! {author_name} Не попал{verb_suffix}(а) по {victim.mention}! (Целься лучше лузер)"
+        msg = f"(Промах)! {author_name} Не попал{verb_suffix} по {victim.mention}! (Целься лучше лузер!)"
     elif outcome == "counter":
-        msg = f"(Парирование)! {victim.mention} Ловко ушёл{victim_verb_suffix}(а) от атаки и укусил{victim_verb_suffix}(а) {author_name}! (-10HP)"
+        msg = f"(Парирование)! {victim.mention} Ловко ушёл{victim_verb_suffix} от атаки и укусил{victim_verb_suffix} {author_name}! (-10HP)"
     elif outcome == "fail":
-        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix}(а) моськой в лужу, когда хотела укусить {victim.mention}!"
+        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {victim.mention}!"
     elif outcome == "potion":
-        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix}(а) поесть вискаса, а не кусить {victim.mention}!"
+        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса, а не кусить {victim.mention}!"
 
     await interaction.response.send_message(msg)
 
@@ -168,6 +172,3 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
-
-
-
