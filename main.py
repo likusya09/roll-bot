@@ -20,15 +20,21 @@ def get_verb_suffix(name: str) -> str:
     # Оставляем только буквы и цифры, приводим к нижнему регистру
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     
-    # Список очищенных женских имён (только текст!)
-    female_names = {
+    # Список ключевых женских частей имён
+    female_keywords = {
         "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
-        "anyadark", "solnishko", "bonniblu"
+        "anya", "solnishko", "bonniblu", "лика", "аня", "даника", "боробка"
     }
     
-    if clean.endswith(("а", "я", "ь")) or clean in female_names:
+    # Проверяем: оканчивается на "а"/"я"/"ь" ИЛИ содержит любое ключевое слово
+    if clean.endswith(("а", "я", "ь")):
         return "а"
+    
+    for keyword in female_keywords:
+        if keyword in clean:
+            return "а"
+    
     return ""
 
 @bot.event
@@ -177,3 +183,4 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
