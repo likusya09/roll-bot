@@ -101,7 +101,7 @@ def roll_attack():
         return "counter"
     elif r < 0.95:      # 5% — падение
         return "fail"
-    else r < 1.00:      # 5% — зелье
+    else:               # 5% — зелье
         return "potion"
 
 # === /кусьрп ===
@@ -183,5 +183,6 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
 
 
