@@ -66,7 +66,7 @@ def get_verb_suffix(name: str) -> str:
     lower = name.lower()
     if (
         lower.endswith(("а", "я", "ь")) or
-        lower in ["лика", "боробка", "даника", "аня", "няшка", "курими"]
+        lower in ["belova7777", "v_hanali_v", "borobka", "dannika_wildfire", "alinkal", "ellie_rou", "blusky2568", "kurumi07948"]
     ):
         return "а"
     return ""
@@ -101,19 +101,19 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
     outcome = roll_attack()
 
     if outcome == "megakus":
-        msg = f"(Мегакусь)! {author_name} Свалил{verb_suffix}(а) наповал {target.mention}! (-100HP)"
+        msg = f"(Мегакусь)! {author_name} Свалил{verb_suffix} наповал {target.mention}! (-100HP)"
     elif outcome == "crit":
-        msg = f"(Крит)! {author_name} Оторвал{verb_suffix}(а) кусочек от {target.mention}! (-20HP)"
+        msg = f"(Крит)! {author_name} Оторвал{verb_suffix} кусочек от {target.mention}! (-20HP)"
     elif outcome == "hit":
-        msg = f"(Попадание)! {author_name} Укусил{verb_suffix}(а) {target.mention}! (-10HP)"
+        msg = f"(Попадание)! {author_name} Укусил{verb_suffix} {target.mention}! (-10HP)"
     elif outcome == "miss":
-        msg = f"(Промах)! {author_name} Не попал{verb_suffix}(а) по {target.mention}! (Целься лучше лузер)"
+        msg = f"(Промах)! {author_name} Не попал{verb_suffix} по {target.mention}! (Целься лучше лузер!)"
     elif outcome == "counter":
-        msg = f"(Парирование)! {target.mention} Ловко ушёл{target_verb_suffix}(а) от атаки и укусил{target_verb_suffix}(а) {author_name}! (-10HP)"
+        msg = f"(Парирование)! {target.mention} Ловко ушёл{target_verb_suffix} от атаки и укусил{target_verb_suffix} {author_name}! (-10HP)"
     elif outcome == "fail":
-        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix}(а) моськой в лужу, когда хотела укусить {target.mention}!"
+        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {target.mention}!"
     elif outcome == "potion":
-        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix}(а) поесть вискаса, а не кусить {target.mention}!"
+        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса, а не кусить {target.mention}!"
 
     await interaction.response.send_message(msg)
 
@@ -168,3 +168,4 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
