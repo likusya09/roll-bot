@@ -76,7 +76,7 @@ def roll_attack():
         return "hit", "Попадание", -10
 
 # === /кусьРП === (РП-версия с HP и склонением)
-@bot.tree.command(name="кусьРП", description="Укусить указанного пользователя с РП-эффектами и HP")
+@bot.tree.command(name="кусьрп", description="Укусить указанного пользователя с РП-эффектами и HP")
 async def kus_rp(interaction: discord.Interaction, target: discord.Member):
     author_name = interaction.user.display_name
     outcome, label, hp = roll_attack()
@@ -100,7 +100,7 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
     await interaction.response.send_message(msg)
 
 # === /куськРП === (РП-версия, рандом из чата)
-@bot.tree.command(name="куськРП", description="Укусить случайного участника, писавшего здесь за последние 2 дня — с РП-эффектами")
+@bot.tree.command(name="куськрп", description="Укусить случайного участника, писавшего здесь за последние 2 дня — с РП-эффектами")
 async def kusk_rp(interaction: discord.Interaction):
     channel = interaction.channel
     if not isinstance(channel, discord.TextChannel):
@@ -146,3 +146,4 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
