@@ -16,7 +16,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СКЛОНЕНИЯ ===
 def get_verb_suffix(name: str) -> str:
-    """Возвращает 'а', если имя женское, иначе '' (для глаголов: укусил→укусила)."""
+    """Возвращает 'а', если имя женское, иначе '' (для глаголов: укусил → укусила)."""
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     female_keywords = {
         "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
@@ -28,7 +28,7 @@ def get_verb_suffix(name: str) -> str:
     return ""
 
 def get_ushel_suffix(name: str) -> str:
-    """Возвращает 'ла', если имя женское, иначе '' (для глагола: ушёл→ушла)."""
+    """Возвращает 'ла', если имя женское, иначе '' (для глагола: ушёл → ушла)."""
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     female_keywords = {
         "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
@@ -113,7 +113,6 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
     author_name = author.display_name
     target_name = target.display_name
     verb_suffix = get_verb_suffix(author_name)
-    target_verb_suffix = get_verb_suffix(target_name)
 
     outcome = roll_attack()
 
@@ -160,7 +159,6 @@ async def kusk_rp(interaction: discord.Interaction):
     author_name = author.display_name
     victim_name = victim.display_name
     verb_suffix = get_verb_suffix(author_name)
-    victim_verb_suffix = get_verb_suffix(victim_name)
 
     outcome = roll_attack()
 
@@ -189,7 +187,3 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
-
-
-
-
