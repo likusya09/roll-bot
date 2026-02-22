@@ -19,7 +19,7 @@ def get_verb_suffix(name: str) -> str:
     """Возвращает 'а', если имя женское, иначе '' (для глаголов: укусил → укусила)."""
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     female_keywords = {
-        "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
+        "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
         "anya", "solnishko", "bonniblu", "лика", "аня", "даника", "боробка"
     }
@@ -187,3 +187,4 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
