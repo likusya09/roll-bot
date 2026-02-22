@@ -7,7 +7,7 @@ import re
 import json
 
 # === ТОКЕН ===
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("DISCORD_TOKEN")  # Для Replit/Railway
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -28,6 +28,7 @@ def save_hp(data):
 
 # === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СКЛОНЕНИЯ ===
 def get_verb_suffix(name: str) -> str:
+    """Возвращает 'а', если имя женское, иначе '' (для глаголов: укусил → укусила)."""
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     female_keywords = {
         "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
@@ -39,6 +40,7 @@ def get_verb_suffix(name: str) -> str:
     return ""
 
 def get_ushel_suffix(name: str) -> str:
+    """Возвращает 'ла', если имя женское, иначе '' (для глагола: ушёл → ушла)."""
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     female_keywords = {
         "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
@@ -49,7 +51,25 @@ def get_ushel_suffix(name: str) -> str:
         return "ла"
     return ""
 
-# === КОМАНДА: /hp — посмотреть здоровье ===
+@bot.event
+async def on_ready():
+    print(f"✅ Бот {bot.user} запущен!")
+    try:
+        synced = await bot.tree.sync()
+        print(f"🔁 Синхронизировано {len(synced)} слэш-команд.")
+    except Exception as e:
+        print(f"❌ Ошибка синхронизации: {e}")
+
+# === /roll ===
+@bot.tree.command(name="roll", description="Случайное число от 1 до указанного")
+async def roll(interaction: discord.Interaction, max_number: int):
+    if max_number < 1:
+        await interaction.response.send_message("❌ Число должно быть ≥ 1.", ephemeral=True)
+        return
+    result = random.randint(1, max_number)
+    await interaction.response.send_message(f"🎲 Выпало: **{result}** (из 1–{max_number})")
+
+# === /hp — посмотреть здоровье ===
 @bot.tree.command(name="hp", description="Посмотреть своё HP")
 async def check_hp(interaction: discord.Interaction):
     hp_data = load_hp()
@@ -57,51 +77,79 @@ async def check_hp(interaction: discord.Interaction):
     hp = hp_data.get(user_id, 100)
     await interaction.response.send_message(f"🩸 {interaction.user.display_name}: **{hp} HP**")
 
-# === КОМАНДА: /битва — сбросить HP всех участников ===
+# === /битва — сбросить HP всех участников ===
 @bot.tree.command(name="битва", description="Начать новую битву (сбросить HP до 100)")
 async def reset_battle(interaction: discord.Interaction):
-    hp_data = {}
-    save_hp(hp_data)
+    save_hp({})
     await interaction.response.send_message("⚔️ Новая битва началась! Все получили **100 HP**.")
 
-# === Вспомогательная функция для урона/лечения ===
-def apply_hp_change(target_id: str, change: int):
+# === Вспомогательная функция для изменения HP ===
+def apply_hp_change(user_id: str, delta: int):
     hp_data = load_hp()
-    current = hp_data.get(target_id, 100)
-    new_hp = current + change
-    hp_data[target_id] = new_hp
+    current = hp_data.get(user_id, 100)
+    new_hp = current + delta
+    hp_data[user_id] = new_hp
     save_hp(hp_data)
     return new_hp
 
 # === Вспомогательная функция для броска ===
 def roll_attack():
     r = random.random()
-    if r < 0.01:       # 1% — мегакусь (-100)
+    if r < 0.01:       # 1% — мегакусь
         return "megakus"
-    elif r < 0.21:      # 20% — крит (-20)
+    elif r < 0.16:      # 15% — крит
         return "crit"
-    elif r < 0.71:      # 50% — попадание (-10)
+    elif r < 0.66:      # 50% — попадание
         return "hit"
-    elif r < 0.81:      # 10% — промах
+    elif r < 0.78:      # 12% — промах
         return "miss"
-    elif r < 0.90:      # 9% — контратака
+    elif r < 0.90:      # 12% — контратака
         return "counter"
-    elif r < 0.95:      # 5% — падение (-5)
+    elif r < 0.95:      # 5% — падение
         return "fail"
-    else:               # 5% — зелье (+5)
+    else:               # 5% — зелье
         return "potion"
 
+# === /кусь === (без HP, как у тебя)
+@bot.tree.command(name="кусь", description="Укусить указанного пользователя")
+async def kus(interaction: discord.Interaction, target: discord.Member):
+    name = interaction.user.display_name
+    suffix = get_verb_suffix(name)
+    await interaction.response.send_message(f"{name} укусил{suffix} {target.mention}! 😼")
+
+# === /куськ === (без HP, как у тебя)
+@bot.tree.command(name="куськ", description="Укусить случайного участника, писавшего здесь за последние 2 дня")
+async def kusk(interaction: discord.Interaction):
+    channel = interaction.channel
+    if not isinstance(channel, discord.TextChannel):
+        await interaction.response.send_message("❌ Эта команда работает только в текстовых каналах.", ephemeral=True)
+        return
+
+    two_days_ago = datetime.now(timezone.utc) - timedelta(days=2)
+    authors = set()
+
+    async for msg in channel.history(limit=1000, after=two_days_ago):
+        if not msg.author.bot and msg.author != bot.user:
+            authors.add(msg.author)
+
+    if not authors:
+        await interaction.response.send_message("Никто не писал тут 2 дня... 🐾", ephemeral=True)
+        return
+
+    victim = random.choice(list(authors))
+    name = interaction.user.display_name
+    suffix = get_verb_suffix(name)
+    await interaction.response.send_message(f"{name} укусил{suffix} {victim.mention}! 😼")
+
 # === /кусьрп с HP ===
-@bot.tree.command(name="кусьрп", description="Укусить с учётом HP")
+@bot.tree.command(name="кусьрп", description="Укусить указанного пользователя с РП-эффектами и HP")
 async def kus_rp(interaction: discord.Interaction, target: discord.Member):
     author = interaction.user
     author_name = author.display_name
     target_name = target.display_name
     author_id = str(author.id)
     target_id = str(target.id)
-
     verb_suffix = get_verb_suffix(author_name)
-    target_verb_suffix = get_verb_suffix(target_name)
 
     outcome = roll_attack()
 
@@ -123,36 +171,36 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
         msg = f"(Парирование)! {target.mention} Ловко уш{ushel_suffix} от атаки и укусил{ukusil_suffix} {author_name}! (-10HP)\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "fail":
         new_hp = apply_hp_change(author_id, -5)
-        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу...\n🩸 {author_name}: {new_hp} HP"
+        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {target.mention}!\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "potion":
         new_hp = apply_hp_change(author_id, +5)
-        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса!\n🩸 {author_name}: {new_hp} HP"
+        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса, а не кусить {target.mention}!\n🩸 {author_name}: {new_hp} HP"
 
     # Проверка смерти
-    if outcome in ["megakus", "crit", "hit", "counter"] and new_hp <= 0:
+    if outcome in ("megakus", "crit", "hit", "counter") and new_hp <= 0:
         msg += f"\n💀 **{target_name} повержен(а)!**\n🏆 Победитель: **{author_name}**!"
-
-    if outcome in ["fail", "potion"] and new_hp <= 0:
+    if outcome in ("fail", "potion") and new_hp <= 0:
         msg += f"\n💀 **{author_name} погиб(ла) от неудачи!**"
 
     await interaction.response.send_message(msg)
 
 # === /куськрп с HP ===
-@bot.tree.command(name="куськрп", description="Укусить случайного с учётом HP")
+@bot.tree.command(name="куськрп", description="Укусить случайного участника, писавшего здесь за последние 2 дня — с РП-эффектами и HP")
 async def kusk_rp(interaction: discord.Interaction):
     channel = interaction.channel
     if not isinstance(channel, discord.TextChannel):
-        await interaction.response.send_message("❌ Только в текстовых каналах.", ephemeral=True)
+        await interaction.response.send_message("❌ Эта команда работает только в текстовых каналах.", ephemeral=True)
         return
 
     two_days_ago = datetime.now(timezone.utc) - timedelta(days=2)
     authors = set()
+
     async for msg in channel.history(limit=1000, after=two_days_ago):
         if not msg.author.bot and msg.author != bot.user:
             authors.add(msg.author)
 
     if not authors:
-        await interaction.response.send_message("Никто не писал тут 2 дня... 🐾", ephemeral=True)
+        await interaction.response.send_message("Никто не писал здесь за последние 2 дня... 🐾", ephemeral=True)
         return
 
     victim = random.choice(list(authors))
@@ -161,9 +209,7 @@ async def kusk_rp(interaction: discord.Interaction):
     victim_name = victim.display_name
     author_id = str(author.id)
     victim_id = str(victim.id)
-
     verb_suffix = get_verb_suffix(author_name)
-    victim_verb_suffix = get_verb_suffix(victim_name)
 
     outcome = roll_attack()
 
@@ -185,29 +231,20 @@ async def kusk_rp(interaction: discord.Interaction):
         msg = f"(Парирование)! {victim.mention} Ловко уш{ushel_suffix} от атаки и укусил{ukusil_suffix} {author_name}! (-10HP)\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "fail":
         new_hp = apply_hp_change(author_id, -5)
-        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу...\n🩸 {author_name}: {new_hp} HP"
+        msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {victim.mention}!\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "potion":
         new_hp = apply_hp_change(author_id, +5)
-        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса!\n🩸 {author_name}: {new_hp} HP"
+        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса, а не кусить {victim.mention}!\n🩸 {author_name}: {new_hp} HP"
 
     # Проверка смерти
-    if outcome in ["megakus", "crit", "hit", "counter"] and new_hp <= 0:
+    if outcome in ("megakus", "crit", "hit", "counter") and new_hp <= 0:
         msg += f"\n💀 **{victim_name} повержен(а)!**\n🏆 Победитель: **{author_name}**!"
-
-    if outcome in ["fail", "potion"] and new_hp <= 0:
+    if outcome in ("fail", "potion") and new_hp <= 0:
         msg += f"\n💀 **{author_name} погиб(ла) от неудачи!**"
 
     await interaction.response.send_message(msg)
 
-@bot.event
-async def on_ready():
-    print(f"✅ Бот {bot.user} запущен!")
-    try:
-        synced = await bot.tree.sync()
-        print(f"🔁 Синхронизировано {len(synced)} команд.")
-    except Exception as e:
-        print(f"❌ Ошибка: {e}")
-
+# === ЗАПУСК ===
 if __name__ == "__main__":
     if TOKEN:
         bot.run(TOKEN)
