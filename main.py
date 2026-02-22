@@ -93,13 +93,13 @@ def roll_attack():
     r = random.random()
     if r < 0.01:       # 1% — мегакусь
         return "megakus"
-    elif r < 0.21:      # 20% — крит
+    elif r < 0.16:      # 15% — крит
         return "crit"
-    elif r < 0.71:      # 50% — попадание
+    elif r < 0.66:      # 50% — попадание
         return "hit"
-    elif r < 0.81:      # 10% — промах
+    elif r < 0.78:      # 12% — промах
         return "miss"
-    elif r < 0.90:      # 9% — контратака
+    elif r < 0.90:      # 12% — контратака
         return "counter"
     elif r < 0.95:      # 5% — падение
         return "fail"
@@ -187,4 +187,5 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан! Добавь его в Secrets (Replit) или Variables (Railway).")
+
 
