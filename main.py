@@ -33,7 +33,7 @@ def get_verb_suffix(name: str) -> str:
     female_keywords = {
         "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
-        "anya", "solnishko", "bonniblu", "лика", "аня", "даника", "боробка"
+        "anya", "solnishko", "bonniblu", "pogorelova", "аня", "даника", "боробка"
     }
     if clean.endswith(("а", "я", "ь")) or any(kw in clean for kw in female_keywords):
         return "а"
@@ -45,7 +45,7 @@ def get_ushel_form(name: str) -> str:
     female_keywords = {
         "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
-        "anya", "solnishko", "bonniblu", "лика", "аня", "даника", "боробка"
+        "anya", "solnishko", "bonniblu", "pogorelova", "аня", "даника", "боробка"
     }
     if clean.endswith(("а", "я", "ь")) or any(kw in clean for kw in female_keywords):
         return "ушла"
@@ -250,4 +250,5 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан!")
+
 
