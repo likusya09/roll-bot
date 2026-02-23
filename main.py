@@ -31,7 +31,7 @@ def get_verb_suffix(name: str) -> str:
     """Возвращает 'а', если имя женское, иначе '' (для глаголов: укусил → укусила)."""
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     female_keywords = {
-        "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
+        "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
         "anya", "solnishko", "bonniblu", "лика", "аня", "даника", "боробка"
     }
@@ -39,17 +39,17 @@ def get_verb_suffix(name: str) -> str:
         return "а"
     return ""
 
-def get_ushel_suffix(name: str) -> str:
-    """Возвращает 'ла', если имя женское, иначе '' (для глагола: ушёл → ушла)."""
+def get_ushel_form(name: str) -> str:
+    """Возвращает 'ушла' если имя женское, иначе 'ушёл'."""
     clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
     female_keywords = {
-        "yuukou", "elena", "hanali", "borobka", "dannika", "alina", "alinca", "alinka",
+        "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
         "anya", "solnishko", "bonniblu", "лика", "аня", "даника", "боробка"
     }
     if clean.endswith(("а", "я", "ь")) or any(kw in clean for kw in female_keywords):
-        return "ла"
-    return ""
+        return "ушла"
+    return "ушёл"
 
 @bot.event
 async def on_ready():
@@ -165,10 +165,10 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
     elif outcome == "miss":
         msg = f"(Промах)! {author_name} Не попал{verb_suffix} по {target.mention}! (Целься лучше лузер!)"
     elif outcome == "counter":
-        ushel_suffix = get_ushel_suffix(target_name)
+        ushel_form = get_ushel_form(target_name)
         ukusil_suffix = get_verb_suffix(target_name)
         new_hp = apply_hp_change(author_id, -10)
-        msg = f"(Парирование)! {target.mention} Ловко уш{ushel_suffix} от атаки и укусил{ukusil_suffix} {author_name}! (-10HP)\n🩸 {author_name}: {new_hp} HP"
+        msg = f"(Парирование)! {target.mention} Ловко {ushel_form} от атаки и укусил{ukusil_suffix} {author_name}! (-10HP)\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "fail":
         new_hp = apply_hp_change(author_id, -5)
         msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {target.mention}!\n🩸 {author_name}: {new_hp} HP"
@@ -225,10 +225,10 @@ async def kusk_rp(interaction: discord.Interaction):
     elif outcome == "miss":
         msg = f"(Промах)! {author_name} Не попал{verb_suffix} по {victim.mention}! (Целься лучше лузер!)"
     elif outcome == "counter":
-        ushel_suffix = get_ushel_suffix(victim_name)
+        ushel_form = get_ushel_form(victim_name)
         ukusil_suffix = get_verb_suffix(victim_name)
         new_hp = apply_hp_change(author_id, -10)
-        msg = f"(Парирование)! {victim.mention} Ловко уш{ushel_suffix} от атаки и укусил{ukusil_suffix} {author_name}! (-10HP)\n🩸 {author_name}: {new_hp} HP"
+        msg = f"(Парирование)! {victim.mention} Ловко {ushel_form} от атаки и укусил{ukusil_suffix} {author_name}! (-10HP)\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "fail":
         new_hp = apply_hp_change(author_id, -5)
         msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {victim.mention}!\n🩸 {author_name}: {new_hp} HP"
@@ -250,3 +250,4 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан!")
+
