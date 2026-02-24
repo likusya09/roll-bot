@@ -33,7 +33,7 @@ def get_verb_suffix(name: str) -> str:
     female_keywords = {
         "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
-        "anya", "solnishko", "bonniblu", "pogorelova", "аня", "даника", "боробка"
+        "anya", "solnishko", "bonniblu", "pogorelova", "лика", "аня", "даника", "боробка"
     }
     if clean.endswith(("а", "я", "ь")) or any(kw in clean for kw in female_keywords):
         return "а"
@@ -45,11 +45,23 @@ def get_ushel_form(name: str) -> str:
     female_keywords = {
         "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
         "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
-        "anya", "solnishko", "bonniblu", "pogorelova", "аня", "даника", "боробка"
+        "anya", "solnishko", "bonniblu", "pogorelova", "лика", "аня", "даника", "боробка"
     }
     if clean.endswith(("а", "я", "ь")) or any(kw in clean for kw in female_keywords):
         return "ушла"
     return "ушёл"
+
+def get_pogib_form(name: str) -> str:
+    """Возвращает 'погибла' если имя женское, иначе 'погиб'."""
+    clean = re.sub(r"[^a-zа-яё0-9]", "", name.lower())
+    female_keywords = {
+        "yuukou", "elena", "hanali", "bopobka", "dannika", "alina", "alinca", "alinka",
+        "ellie", "ana", "anastasia", "amo", "kurumi", "medeia", "bonni", "diana",
+        "anya", "solnishko", "bonniblu", "pogorelova", "лика", "аня", "даника", "боробка"
+    }
+    if clean.endswith(("а", "я", "ь")) or any(kw in clean for kw in female_keywords):
+        return "погибла"
+    return "погиб"
 
 @bot.event
 async def on_ready():
@@ -95,19 +107,19 @@ def apply_hp_change(user_id: str, delta: int):
 # === Вспомогательная функция для броска ===
 def roll_attack():
     r = random.random()
-    if r < 0.01:       # 1% — мегакусь
+    if r < 0.02:       # 2% — мегакусь
         return "megakus"
-    elif r < 0.16:      # 15% — крит
+    elif r < 0.17:      # 15% — крит
         return "crit"
-    elif r < 0.66:      # 50% — попадание
+    elif r < 0.64:      # 48% — попадание
         return "hit"
-    elif r < 0.78:      # 12% — промах
+    elif r < 0.76:      # 12% — промах
         return "miss"
-    elif r < 0.90:      # 12% — контратака
+    elif r < 0.88:      # 12% — контратака
         return "counter"
-    elif r < 0.95:      # 5% — падение
+    elif r < 0.94:      # 6% — падение
         return "fail"
-    else:               # 5% — зелье
+    else:               # 6% — зелье
         return "potion"
 
 # === /кусь === (без HP, как у тебя)
@@ -173,14 +185,15 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
         new_hp = apply_hp_change(author_id, -5)
         msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {target.mention}!\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "potion":
-        new_hp = apply_hp_change(author_id, +5)
-        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса, а не кусить {target.mention}!\n🩸 {author_name}: {new_hp} HP"
+        new_hp = apply_hp_change(author_id, +10)
+        msg = f"(Корм)! {author_name} (+10HP) Решил{verb_suffix} поесть вискаса, а не кусить {target.mention}!\n🩸 {author_name}: {new_hp} HP"
 
     # Проверка смерти
     if outcome in ("megakus", "crit", "hit", "counter") and new_hp <= 0:
-        msg += f"\n💀 **{target_name} повержен(а)!**\n🏆 Победитель: **{author_name}**!"
+        msg += f"\n💀 **{target_name} повержен{verb_suffix}!**\n🏆 Победитель: **{author_name}**!"
     if outcome in ("fail", "potion") and new_hp <= 0:
-        msg += f"\n💀 **{author_name} погиб(ла) от неудачи!**"
+        pogib_form = get_pogib_form(author_name)
+        msg += f"\n💀 **{author_name} {pogib_form} от неудачи!**"
 
     await interaction.response.send_message(msg)
 
@@ -233,14 +246,18 @@ async def kusk_rp(interaction: discord.Interaction):
         new_hp = apply_hp_change(author_id, -5)
         msg = f"(Неудача)! {author_name} (-5HP) Упал{verb_suffix} моськой в лужу, когда хотел{verb_suffix} укусить {victim.mention}!\n🩸 {author_name}: {new_hp} HP"
     elif outcome == "potion":
-        new_hp = apply_hp_change(author_id, +5)
-        msg = f"(Корм)! {author_name} (+5HP) Решил{verb_suffix} поесть вискаса, а не кусить {victim.mention}!\n🩸 {author_name}: {new_hp} HP"
+        new_hp = apply_hp_change(author_id, +10)
+        msg = f"(Корм)! {author_name} (+10HP) Решил{verb_suffix} поесть вискаса, а не кусить {victim.mention}!\n🩸 {author_name}: {new_hp} HP"
 
     # Проверка смерти
     if outcome in ("megakus", "crit", "hit", "counter") and new_hp <= 0:
-        msg += f"\n💀 **{victim_name} повержен(а)!**\n🏆 Победитель: **{author_name}**!"
+        pogib_suffix = ""  # для "повержен/повержена"
+        if get_verb_suffix(victim_name) == "а":
+            pogib_suffix = "а"
+        msg += f"\n💀 **{victim_name} повержен{verb_suffix}!**\n🏆 Победитель: **{author_name}**!"
     if outcome in ("fail", "potion") and new_hp <= 0:
-        msg += f"\n💀 **{author_name} погиб(ла) от неудачи!**"
+        pogib_form = get_pogib_form(author_name)
+        msg += f"\n💀 **{author_name} {pogib_form} от неудачи!**"
 
     await interaction.response.send_message(msg)
 
