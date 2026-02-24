@@ -190,7 +190,8 @@ async def kus_rp(interaction: discord.Interaction, target: discord.Member):
 
     # Проверка смерти
     if outcome in ("megakus", "crit", "hit", "counter") and new_hp <= 0:
-        msg += f"\n💀 **{target_name} повержен{verb_suffix}!**\n🏆 Победитель: **{author_name}**!"
+        povержen_suffix = "а" if get_verb_suffix(target_name) == "а" else ""
+        msg += f"\n💀 **{target_name} повержен{povержen_suffix}!**\n🏆 Победитель: **{author_name}**!"
     if outcome in ("fail", "potion") and new_hp <= 0:
         pogib_form = get_pogib_form(author_name)
         msg += f"\n💀 **{author_name} {pogib_form} от неудачи!**"
@@ -251,10 +252,8 @@ async def kusk_rp(interaction: discord.Interaction):
 
     # Проверка смерти
     if outcome in ("megakus", "crit", "hit", "counter") and new_hp <= 0:
-        pogib_suffix = ""  # для "повержен/повержена"
-        if get_verb_suffix(victim_name) == "а":
-            pogib_suffix = "а"
-        msg += f"\n💀 **{victim_name} повержен{verb_suffix}!**\n🏆 Победитель: **{author_name}**!"
+        povержen_suffix = "а" if get_verb_suffix(victim_name) == "а" else ""
+        msg += f"\n💀 **{victim_name} повержен{povержen_suffix}!**\n🏆 Победитель: **{author_name}**!"
     if outcome in ("fail", "potion") and new_hp <= 0:
         pogib_form = get_pogib_form(author_name)
         msg += f"\n💀 **{author_name} {pogib_form} от неудачи!**"
@@ -267,5 +266,3 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("⚠️ DISCORD_TOKEN не задан!")
-
-
